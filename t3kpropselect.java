@@ -3,7 +3,7 @@
  * 
  * Made, since I repeatably required this wrapper with this functionality in numberous projects.
  * 
- *  @version 1.1
+ *  @version 1.1.1
  *	@author Alen Milincevic
  *
  *	@section LICENSE
@@ -41,6 +41,25 @@ public class t3kpropselect extends Properties {
 	final static int CONTAINS = 3;
 	final static int REGEX = 4;
 
+	boolean unique = true;
+	
+	/**
+	 * Set the uniquness of returned parts
+	 * @param unique
+	 */
+	public void setAllUniqueKeyParts (boolean unique) {
+		this.unique = unique;
+	}
+	
+	/**
+	 * Get the uniquness of the returned parts
+	 * 
+	 * @return true or false, depending if unique or not
+	 */
+	public boolean getAllUniqueKeyParts() {
+		return unique;
+	}
+	
 	/**
 	 * Get all properties keys and values which begin with the key
 	 * @param key the key
@@ -167,19 +186,36 @@ public class t3kpropselect extends Properties {
 		if (end == null) return new String[0];
 		
 		Properties allKeys = getAllKeyValuesByBeginAndEnd(begin,end);
-		String[] keys = new String[allKeys.size()];
+		String[] keys = new String[0];
 
+		if (unique == false) { keys = new String[allKeys.size()]; };
+		Properties unique = new Properties();
+		
 		Enumeration e = allKeys.propertyNames();
-
 		int i = 0;
 		while (e.hasMoreElements()) {
 		      String key = (String) e.nextElement();
-		      if ((begin != null) && (end != null)) {
-		    	  keys[i] = key.substring(begin.length(), key.length()-end.length());  
+		      if ((begin != null) && (end != null)) {		    	  
+		    	  if (this.unique == true) {
+		    		  unique.setProperty(key.substring(begin.length(), key.length()-end.length()), "1");
+		    	  } else {
+		    		  keys[i] = key.substring(begin.length(), key.length()-end.length());  
+		    	  }
 		      }
 		      i++;
 		}
-		    
+		
+		if (this.unique == true) {
+			 keys = new String[unique.size()];
+			 e = unique.propertyNames();
+			 int j = 0;
+			 while (e.hasMoreElements()) {
+			      String key = (String) e.nextElement();
+			      keys[j] = key;
+			      j++;
+			 }
+		}
+		
 		return keys;
 	}
 	
